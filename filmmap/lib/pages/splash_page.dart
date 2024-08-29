@@ -1,4 +1,5 @@
 import 'package:filmmap/pages/home_page.dart';
+import 'package:filmmap/pages/router_page.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
@@ -27,7 +28,7 @@ class _SplashPageState extends State<SplashPage> {
       _controller!.addListener(() {
         if (_controller!.value.position == _controller!.value.duration) {
           Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (context) => const HomePage()),
+            MaterialPageRoute(builder: (context) => const RouterPage()),
           );
         }
       });

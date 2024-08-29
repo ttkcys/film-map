@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:filmmap/model/cast_model.dart';
 import 'package:filmmap/model/movie_model.dart';
 import 'package:http/http.dart' as http;
 
@@ -14,7 +15,9 @@ class MovieService {
     final response = await http.get(Uri.parse(url));
 
     if (response.statusCode == 200) {
-      final List results = json.decode(response.body)['results'];
+      final data = json.decode(response.body);
+      print("API Response: $data"); // API yanıtını kontrol et
+      final List results = data['results'];
       return results.map((movie) => Movie.fromJson(movie)).toList();
     } else {
       throw Exception('Failed to load movies');
@@ -26,12 +29,28 @@ class MovieService {
         '$_baseUrl/discover/movie?api_key=$_apiKey&language=$_language&with_genres=$genreId';
 
     final response = await http.get(Uri.parse(url));
-
     if (response.statusCode == 200) {
-      final List results = json.decode(response.body)['results'];
+      final data = json.decode(response.body);
+      print("Genres data: ${data['genres']}");
+      final List results = data['results'];
       return results.map((movie) => Movie.fromJson(movie)).toList();
     } else {
-      throw Exception('Failed to load movies by genre');
+      throw Exception('Failed to load movies');
+    }
+  }
+
+  Future<List<Cast>> fetchCast(int movieId) async {
+    final url =
+        '$_baseUrl/movie/$movieId/credits?api_key=$_apiKey&language=$_language';
+
+    final response = await http.get(Uri.parse(url));
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      final List results = data['cast'];
+      return results.map((cast) => Cast.fromJson(cast)).toList();
+    } else {
+      throw Exception('Failed to load cast');
     }
   }
 

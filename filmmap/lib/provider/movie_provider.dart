@@ -1,3 +1,4 @@
+import 'package:filmmap/model/cast_model.dart';
 import 'package:filmmap/model/movie_model.dart';
 import 'package:filmmap/service/movie_service.dart';
 import 'package:flutter/material.dart';
@@ -10,12 +11,14 @@ class MovieProvider with ChangeNotifier {
   List<Movie> _upcomingMovies = [];
   List<Movie> _topRatedMovies = [];
   List<Movie> _genreMovies = [];
+  List<Cast> _movieCast = [];
 
   List<Movie> get popularMovies => _popularMovies;
   List<Movie> get nowPlayingMovies => _nowPlayingMovies;
   List<Movie> get upcomingMovies => _upcomingMovies;
   List<Movie> get topRatedMovies => _topRatedMovies;
   List<Movie> get genreMovies => _genreMovies;
+  List<Cast> get movieCast => _movieCast;
 
   bool _isLoading = false;
   bool get isLoading => _isLoading;
@@ -65,6 +68,16 @@ class MovieProvider with ChangeNotifier {
     notifyListeners();
 
     _genreMovies = await _movieService.fetchMoviesByGenre(genreId);
+
+    _isLoading = false;
+    notifyListeners();
+  }
+
+  Future<void> fetchCast(int movieId) async {
+    _isLoading = true;
+    notifyListeners();
+
+    _movieCast = await _movieService.fetchCast(movieId);
 
     _isLoading = false;
     notifyListeners();

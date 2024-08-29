@@ -1,62 +1,61 @@
-import 'package:filmmap/pages/detail_page.dart';
+import 'package:filmmap/model/tv_model.dart';
+import 'package:filmmap/pages/tv_detail_page.dart';
+import 'package:filmmap/provider/tv_provider.dart';
 import 'package:filmmap/utils/genre_map.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'dart:ui';
 
-import 'package:filmmap/model/movie_model.dart';
-import 'package:filmmap/provider/movie_provider.dart';
-
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+class HomeTvShowPage extends StatefulWidget {
+  const HomeTvShowPage({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<HomeTvShowPage> createState() => _HomeTvShowPageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomeTvShowPageState extends State<HomeTvShowPage> {
   String _selectedCategory = 'Popüler';
   String _selectedGenre = 'Tümü';
-  List<Movie> _currentMovies = [];
+  List<TvShow> _currentTvShows = [];
 
   final Map<String, String> _categoryMap = {
     'Popüler': 'popular',
-    'Gösterimde': 'now_playing',
-    'Yakında': 'upcoming',
+    'Bugün Yayınlanıyor': 'airing_today',
+    'Şu Anda Yayında': 'on_the_air',
     'En Çok Oy Alan': 'top_rated',
   };
 
   @override
   void initState() {
     super.initState();
-    // Varsayılan olarak popüler filmleri yükle
-    Future.microtask(() => Provider.of<MovieProvider>(context, listen: false)
-        .fetchPopularMovies());
+    // Default olarak popüler TV şovlarını yükle
+    Future.microtask(() => Provider.of<TvShowProvider>(context, listen: false)
+        .fetchPopularTvShows());
   }
 
   void _onCategoryChanged(String? newValue) {
     if (newValue != null) {
       setState(() {
         _selectedCategory = newValue;
-        // Seçilen kategoriye göre filmleri yükle
-        final movieProvider =
-            Provider.of<MovieProvider>(context, listen: false);
+        // Seçilen kategoriye göre TV şovlarını yükle
+        final tvShowProvider =
+            Provider.of<TvShowProvider>(context, listen: false);
         switch (_categoryMap[newValue]) {
           case 'popular':
-            movieProvider.fetchPopularMovies();
-            _currentMovies = movieProvider.popularMovies;
+            tvShowProvider.fetchPopularTvShows();
+            _currentTvShows = tvShowProvider.popularTvShows;
             break;
-          case 'now_playing':
-            movieProvider.fetchNowPlayingMovies();
-            _currentMovies = movieProvider.nowPlayingMovies;
+          case 'airing_today':
+            tvShowProvider.fetchAiringTodayTvShows();
+            _currentTvShows = tvShowProvider.airingTodayTvShows;
             break;
-          case 'upcoming':
-            movieProvider.fetchUpcomingMovies();
-            _currentMovies = movieProvider.upcomingMovies;
+          case 'on_the_air':
+            tvShowProvider.fetchOnTheAirTvShows();
+            _currentTvShows = tvShowProvider.onTheAirTvShows;
             break;
           case 'top_rated':
-            movieProvider.fetchTopRatedMovies();
-            _currentMovies = movieProvider.topRatedMovies;
+            tvShowProvider.fetchTopRatedTvShows();
+            _currentTvShows = tvShowProvider.topRatedTvShows;
             break;
         }
       });
@@ -69,8 +68,8 @@ class _HomePageState extends State<HomePage> {
         _selectedGenre = newValue;
         final genreId = reverseGenreMap[newValue] ?? 0;
         if (genreId != 0) {
-          Provider.of<MovieProvider>(context, listen: false)
-              .fetchMoviesByGenre(genreId);
+          Provider.of<TvShowProvider>(context, listen: false)
+              .fetchTvShowsByGenre(genreId);
         } else {
           _onCategoryChanged(_selectedCategory);
         }
@@ -82,9 +81,9 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: Consumer<MovieProvider>(
-          builder: (context, movieProvider, child) {
-            if (movieProvider.isLoading) {
+        child: Consumer<TvShowProvider>(
+          builder: (context, tvShowProvider, child) {
+            if (tvShowProvider.isLoading) {
               return const Center(
                 child: CircularProgressIndicator(
                   color: Colors.blue,
@@ -93,38 +92,38 @@ class _HomePageState extends State<HomePage> {
             }
 
             // Doğru listeyi belirle
-            List<Movie> moviesToShow = [];
+            List<TvShow> tvShowsToShow = [];
             switch (_selectedCategory) {
               case 'Popüler':
-                moviesToShow = movieProvider.popularMovies;
+                tvShowsToShow = tvShowProvider.popularTvShows;
                 break;
-              case 'Gösterimde':
-                moviesToShow = movieProvider.nowPlayingMovies;
+              case 'Bugün Yayınlanıyor':
+                tvShowsToShow = tvShowProvider.airingTodayTvShows;
                 break;
-              case 'Yakında':
-                moviesToShow = movieProvider.upcomingMovies;
+              case 'Şu Anda Yayında':
+                tvShowsToShow = tvShowProvider.onTheAirTvShows;
                 break;
               case 'En Çok Oy Alan':
-                moviesToShow = movieProvider.topRatedMovies;
+                tvShowsToShow = tvShowProvider.topRatedTvShows;
                 break;
             }
 
-            if (moviesToShow.isEmpty) {
-              return const Center(child: Text("Film bulunamadı"));
+            if (tvShowsToShow.isEmpty) {
+              return const Center(child: Text("TV Şovu bulunamadı"));
             }
 
             return Stack(
               children: [
                 // Arka plan görüntüsü (background image)
                 PageView.builder(
-                  itemCount: moviesToShow.length,
+                  itemCount: tvShowsToShow.length,
                   itemBuilder: (context, index) {
-                    final Movie movie = moviesToShow[index];
+                    final TvShow tvShow = tvShowsToShow[index];
                     return Stack(
                       children: [
                         Positioned.fill(
                           child: Image.network(
-                            'https://image.tmdb.org/t/p/w500${movie.backgroundPath}',
+                            'https://image.tmdb.org/t/p/w500${tvShow.backgroundPath}',
                             fit: BoxFit.cover,
                           ),
                         ),
@@ -142,9 +141,9 @@ class _HomePageState extends State<HomePage> {
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              // Filmin adı
+                              // TV Şovunun adı
                               Text(
-                                movie.title,
+                                tvShow.name,
                                 style: const TextStyle(
                                   fontSize: 32,
                                   color: Colors.white,
@@ -170,7 +169,7 @@ class _HomePageState extends State<HomePage> {
                                 child: ClipRRect(
                                   borderRadius: BorderRadius.circular(12),
                                   child: Image.network(
-                                    'https://image.tmdb.org/t/p/w500${movie.posterPath}',
+                                    'https://image.tmdb.org/t/p/w500${tvShow.posterPath}',
                                     fit: BoxFit.cover,
                                   ),
                                 ),
@@ -183,7 +182,7 @@ class _HomePageState extends State<HomePage> {
                                     context,
                                     MaterialPageRoute(
                                       builder: (context) =>
-                                          DetailPage(movie: movie),
+                                          TvDetailPage(tvShow: tvShow),
                                     ),
                                   );
                                 },
