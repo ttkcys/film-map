@@ -1,5 +1,5 @@
-import 'package:filmmap/provider/movide_provider.dart';
-import 'package:filmmap/splash_page.dart';
+import 'package:filmmap/provider/movie_provider.dart';
+import 'package:filmmap/pages/splash_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
